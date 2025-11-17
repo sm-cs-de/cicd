@@ -1,4 +1,5 @@
 .git
+.gitignore
 *.log
 __pycache__/
 node_modules/

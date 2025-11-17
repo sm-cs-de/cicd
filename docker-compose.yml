@@ -1,0 +1,17 @@
+services:
+  server:
+    build: ./server
+    image: smcsde/cicd:server
+    container_name: cicd_server
+    volumes:
+      - sockdata:/sockets
+
+  client:
+    build: ./client
+    image: smcsde/cicd:client
+    container_name: cicd_client
+    volumes:
+      - sockdata:/sockets
+
+volumes:
+  sockdata:
