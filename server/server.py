@@ -23,7 +23,7 @@ def server_recv(conn):
     data = conn.recv(1024)
     if not data:
         print("Client disconnected")
-        break
+        return "quit"
 
     msg = data.decode()
 
@@ -31,7 +31,7 @@ def server_recv(conn):
 
 
 def server_send(conn, msg):
-    conn.sendall(msg)
+    conn.sendall(msg.encode())
 
 
 def server_close(server, conn):

@@ -1,5 +1,6 @@
 import socket
 import time
+import math
 
 
 def client_connect():
@@ -9,34 +10,40 @@ def client_connect():
     client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     client.connect(SOCKET_PATH)
 
+    return client
 
-def client_send(value):
+
+def client_send(client, value):
     msg = str(value)
     client.sendall(msg.encode())
 
 
-def client_recv():
+def client_recv(client):
     msg = client.recv(1024).decode()
-    value = float(msg)
+    try:
+        value = float(msg)
+    except ValueError:
+        value = math.nan
 
     return value
 
 
-def client_disconnect():
+def client_disconnect(client):
     client.close()
 
 
 if __name__ == "__main__":
-    client_connect()
+    client = client_connect()
 
-    i = 0
-    while i<10:
-        point = 2.1 + 0.1*i
-        client_send(point)
+    point = 0.0
+    for i in range(10):
+        client_send(client, point)
 
-        value = client_recv()
+        value = client_recv(client)
         print(value)
 
         i += 1
+        point = 0.1*i
+        time.sleep(0.25)
 
-    client_disconnect()
+    client_disconnect(client)
