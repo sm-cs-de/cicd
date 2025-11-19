@@ -2,6 +2,7 @@ import socket
 import os
 import time
 
+
 def server_start():
     SOCKET_PATH = "/sockets/cicd.sock"
 

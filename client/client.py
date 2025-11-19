@@ -32,10 +32,14 @@ def client_disconnect(client):
     client.close()
 
 
+def generate_point(i):
+    return 0.1 * i
+
+
 if __name__ == "__main__":
     client = client_connect()
 
-    point = 0.0
+    point = generate_point(0)
     for i in range(10):
         client_send(client, point)
 
@@ -43,7 +47,7 @@ if __name__ == "__main__":
         print(value)
 
         i += 1
-        point = 0.1*i
+        point = generate_point(i)
         time.sleep(0.25)
 
     client_disconnect(client)
