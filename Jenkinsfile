@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_BUILDKIT = "1"
+        BUILD_TAG = "${env.GIT_COMMIT.substring(0,7)}"
     }
 
     options {
@@ -33,8 +34,9 @@ pipeline {
 		sh """
 		. venv/bin/activate
 		pip install flake8
-		flake8 --exclude venv . || true
+		flake8 --exclude venv .> flake8.log || true
 		"""
+                archiveArtifacts artifacts: 'flake8.log', fingerprint: true
 	    }
 	}
 
@@ -43,8 +45,9 @@ pipeline {
 		sh """
 		. venv/bin/activate
 		pip install black
-		black --check --exclude "venv" . || true
+		black --check --exclude "venv" . > black.log 2>&1 || true
 		"""
+                archiveArtifacts artifacts: 'black.log', fingerprint: true
 	    }
 	}
 
@@ -61,19 +64,16 @@ pipeline {
             steps {
                 sh '''
                 echo "Building docker containers..."
-                docker compose build --pull
+                BUILD_TAG=${BUILD_TAG} docker compose build --pull
                 '''
             }
         }
 
-        stage('Run Docker Compose (optional)') {
-            when {
-                expression { fileExists('docker-compose.yml') }
-            }
+        stage('Run Docker Images') {
             steps {
                 sh '''
-                docker compose down || true
-                docker compose up -d
+                BUILD_TAG=${BUILD_TAG} docker compose down || true
+                BUILD_TAG=${BUILD_TAG} docker compose up -d
                 '''
             }
         }

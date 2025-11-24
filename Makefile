@@ -1,33 +1,30 @@
 .PHONY: up down build
 REG=smcsde
 NAME=cicd
-TAG=1
 VERSION=latest
 DOCKERHUB_TOKEN=$(PWD)/.dockerhub-token
 JENKINS_TOKEN=$(PWD)/.jenkins-token
 
 
 build:
-	docker-compose build --pull
+	BUILD_TAG=latest docker-compose build --pull
 
 up:
-	docker-compose up -d
+	BUILD_TAG=latest docker-compose up -d
 
 down:
-	docker-compose down
+	BUILD_TAG=latest docker-compose down
 
-# see available images: docker images
-# use command to tag and upload latest build: make VERSION=v2 upload
 upload:
-	docker tag $(REG)/$(NAME):$(TAG)_server $(REG)/$(NAME):$(TAG)_server-$(VERSION)
-	docker tag $(REG)/$(NAME):$(TAG)_client $(REG)/$(NAME):$(TAG)_client-$(VERSION)
-	@if [ ! -f $(DOCKERHUB_TOKEN) ]; then \
+	docker tag $(REG)/$(NAME):server $(REG)/$(NAME):server-$(VERSION)
+	docker tag $(REG)/$(NAME):client $(REG)/$(NAME):client-$(VERSION)
+	@if [ -f $(DOCKERHUB_TOKEN) ]; then \
 		cat $(DOCKERHUB_TOKEN) | docker login -u $(REG) --password-stdin; \
 	else \
 		docker login; \
 	fi
-	docker push $(REG)/$(NAME):$(TAG)_server-$(VERSION)
-	docker push $(REG)/$(NAME):$(TAG)_client-$(VERSION)
+	docker push $(REG)/$(NAME):server-$(VERSION)
+	docker push $(REG)/$(NAME):client-$(VERSION)
 	
 jenkins:
 	# run jenkins
