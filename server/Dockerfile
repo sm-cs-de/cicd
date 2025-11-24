@@ -5,7 +5,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY server.py .
-COPY tests/test_server.py .
+COPY ../tests/test_server.py .
 
 CMD ["python", "server.py"]
 
