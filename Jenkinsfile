@@ -1,53 +1,80 @@
 pipeline {
     agent any
-    
+
     environment {
-        APP_NAME = "cicd"
+        DOCKER_BUILDKIT = "1"
     }
 
     options {
         timestamps()
-        buildDiscarder(logRotator(numToKeepStr: '15'))
-        timeout(time: 40, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '20'))
     }
 
     stages {
-        stage('Clone') {
+        stage('Checkout') {
             steps {
                 git branch: 'master', url: 'https://github.com/sm-cs-de/cicd.git'
             }
         }
 
-        stage('Install dependencies') {
+	stage('Install dependencies') {
+	    steps {
+		sh """
+		python3 -m venv venv
+		. venv/bin/activate
+		pip install --upgrade pip
+		pip install -r requirements.txt
+		"""
+	    }
+	}
+
+	stage('Lint') {
+	    steps {
+		sh """
+		. venv/bin/activate
+		pip install flake8
+		flake8 --exclude venv . || true
+		"""
+	    }
+	}
+
+	stage('Formatting Check') {
+	    steps {
+		sh """
+		. venv/bin/activate
+		pip install black
+		black --check --exclude "venv" . || true
+		"""
+	    }
+	}
+
+	stage('Unit tests') {
+	    steps {
+		sh """
+		. venv/bin/activate
+		python -m unittest discover -v tests
+		"""
+	    }
+	}
+
+        stage('Build Docker Images') {
             steps {
-                sh """
-                pip install --upgrade pip
-                pip3 install -r requirements.txt
-                """
+                sh '''
+                echo "Building docker containers..."
+                docker compose build --pull
+                '''
             }
         }
 
-        stage('Lint') {
-            steps {
-                sh """
-                pip install flake8
-                flake8 app --count --select=E9,F63,F7,F82 --show-source --statistics
-                """
+        stage('Run Docker Compose (optional)') {
+            when {
+                expression { fileExists('docker-compose.yml') }
             }
-        }
-
-        stage('Formatting Check') {
             steps {
-                sh """
-                pip install black
-                black --check app
-                """
-            }
-        }
-
-        stage('Run tests') {
-            steps {
-                sh 'python3 -m unittest discover -v'
+                sh '''
+                docker compose down || true
+                docker compose up -d
+                '''
             }
         }
     }

@@ -1,9 +1,11 @@
 .PHONY: up down build
 REG=smcsde
-NAME=com
-TAG=cicd
+NAME=cicd
+TAG=1
 VERSION=latest
-TOKEN=$(PWD)/.access-token
+DOCKERHUB_TOKEN=$(PWD)/.dockerhub-token
+JENKINS_TOKEN=$(PWD)/.jenkins-token
+
 
 build:
 	docker-compose build --pull
@@ -19,10 +21,25 @@ down:
 upload:
 	docker tag $(REG)/$(NAME):$(TAG)_server $(REG)/$(NAME):$(TAG)_server-$(VERSION)
 	docker tag $(REG)/$(NAME):$(TAG)_client $(REG)/$(NAME):$(TAG)_client-$(VERSION)
-	@if [ ! -f $(TOKEN) ]; then \
-		@cat $(TOKEN) | docker login -u $(REG) --password-stdin; \
+	@if [ ! -f $(DOCKERHUB_TOKEN) ]; then \
+		cat $(DOCKERHUB_TOKEN) | docker login -u $(REG) --password-stdin; \
 	else \
 		docker login; \
 	fi
 	docker push $(REG)/$(NAME):$(TAG)_server-$(VERSION)
 	docker push $(REG)/$(NAME):$(TAG)_client-$(VERSION)
+	
+jenkins:
+	# run jenkins
+	@echo "Getting jenkings ready..."
+	cd ~/Zeugs/Tools/Build/Jenkins && docker-compose up -d
+	@sleep 5
+	@echo "Starting build..."
+	@if [ -f $(JENKINS_TOKEN) ]; then \
+		TOKEN=$$(cat $(JENKINS_TOKEN)); \
+		curl --user "admin:$$TOKEN" --request 'POST' "http://localhost:8080/job/cicd/build?token=$(NAME)"; \
+	else \
+		echo "Error: No jenkins token!"; \
+		exit 1; \
+	fi
+		

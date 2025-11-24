@@ -2,6 +2,6 @@
 .venv
 .run
 __pycache__
-.access-token
-Local-CICD.md
+.dockerhub-token
+.jenkins-token
 
