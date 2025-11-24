@@ -33,7 +33,6 @@ pipeline {
 	        steps {
 		        sh '''
 		        . venv/bin/activate
-		        pip install flake8
 		        flake8 --exclude venv .> flake8.log || true
 		        '''
                 archiveArtifacts artifacts: 'flake8.log', fingerprint: true
@@ -44,7 +43,6 @@ pipeline {
 	        steps {
 		        sh '''
 		        . venv/bin/activate
-		        pip install black
 		        black --check --exclude "venv" . > black.log 2>&1 || true
 		        '''
                 archiveArtifacts artifacts: 'black.log', fingerprint: true
