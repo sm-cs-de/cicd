@@ -1,13 +1,17 @@
 services:
   server:
-    build: ./server
+    build: 
+      context: .
+      dockerfile: server/Dockerfile
     image: smcsde/cicd:server_${VERSION}
     container_name: cicd_server_${VERSION}
     volumes:
       - sockdata:/sockets
 
   client:
-    build: ./client
+    build: 
+      context: .
+      dockerfile: client/Dockerfile
     image: smcsde/cicd:client_${VERSION}
     container_name: cicd_client_${VERSION}
     volumes:
