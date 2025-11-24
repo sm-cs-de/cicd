@@ -1,15 +1,15 @@
 services:
   server:
     build: ./server
-    image: smcsde/cicd:server_${BUILD_TAG}
-    container_name: cicd_server_${BUILD_TAG}
+    image: smcsde/cicd:server_${VERSION}
+    container_name: cicd_server_${VERSION}
     volumes:
       - sockdata:/sockets
 
   client:
     build: ./client
-    image: smcsde/cicd:client_${BUILD_TAG}
-    container_name: cicd_client_${BUILD_TAG}
+    image: smcsde/cicd:client_${VERSION}
+    container_name: cicd_client_${VERSION}
     volumes:
       - sockdata:/sockets
 

@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_BUILDKIT = "1"
-        BUILD_TAG = "${env.GIT_COMMIT.substring(0,7)}"
+        VERSION = "${env.GIT_COMMIT.substring(0,7)}"
     }
 
     options {
@@ -18,7 +18,7 @@ pipeline {
             }
         }
 
-	stage('Install dependencies') {
+	stage('Install Dependencies') {
 	    steps {
 		sh """
 		python3 -m venv venv
@@ -29,7 +29,7 @@ pipeline {
 	    }
 	}
 
-	stage('Lint') {
+	stage('Check Style') {
 	    steps {
 		sh """
 		. venv/bin/activate
@@ -40,7 +40,7 @@ pipeline {
 	    }
 	}
 
-	stage('Formatting Check') {
+	stage('Check Formatting') {
 	    steps {
 		sh """
 		. venv/bin/activate
@@ -51,7 +51,7 @@ pipeline {
 	    }
 	}
 
-	stage('Unit tests') {
+	stage('Run Unit Tests 1') {
 	    steps {
 		sh """
 		. venv/bin/activate
@@ -64,16 +64,29 @@ pipeline {
             steps {
                 sh '''
                 echo "Building docker containers..."
-                BUILD_TAG=${BUILD_TAG} docker compose build --pull
+                VERSION=${VERSION} docker compose build --pull
                 '''
             }
         }
+        
+        stage('Run Unit Tests 2') {
+            steps {
+                sh """
+                SERVICES=$$(docker compose -f docker-compose.ci.yml config --services)
+                for SERVICE in $$SERVICES; do
+                    LOG_FILE=$${SERVICE}_test.log
+                    echo "Running pytest inside $$SERVICE..."
+                    docker compose run --rm $$SERVICE pytest --maxfail=5 --disable-warnings > $$LOG_FILE 2>&1 || true
+                done
+                """
+                archiveArtifacts artifacts: '*_test.log', fingerprint: true
+            }
 
         stage('Run Docker Images') {
             steps {
                 sh '''
-                BUILD_TAG=${BUILD_TAG} docker compose down || true
-                BUILD_TAG=${BUILD_TAG} docker compose up -d
+                VERSION=${VERSION} docker compose down || true
+                VERSION=${VERSION} docker compose up -d
                 '''
             }
         }

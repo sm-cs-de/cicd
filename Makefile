@@ -7,13 +7,13 @@ JENKINS_TOKEN=$(PWD)/.jenkins-token
 
 
 build:
-	BUILD_TAG=latest docker-compose build --pull
+	VERSION=$(VERSION) docker-compose build --pull
 
 up:
-	BUILD_TAG=latest docker-compose up -d
+	VERSION=$(VERSION) docker-compose up -d
 
 down:
-	BUILD_TAG=latest docker-compose down
+	VERSION=$(VERSION) docker-compose down
 
 upload:
 	docker tag $(REG)/$(NAME):server $(REG)/$(NAME):server-$(VERSION)
