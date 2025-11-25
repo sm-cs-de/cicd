@@ -2,7 +2,7 @@ services:
   server:
     build: 
       context: .
-      dockerfile: server/Dockerfile
+      dockerfile: build/Dockerfile.server
     image: smcsde/cicd:server_${VERSION}
     container_name: cicd_server_${VERSION}
     volumes:
@@ -11,7 +11,7 @@ services:
   client:
     build: 
       context: .
-      dockerfile: client/Dockerfile
+      dockerfile: build/Dockerfile.client
     image: smcsde/cicd:client_${VERSION}
     container_name: cicd_client_${VERSION}
     volumes:

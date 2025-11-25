@@ -1,7 +1,8 @@
-.idea
-.venv
-.run
-__pycache__
+.idea/
+.run/
+.venv/
+.pytest_cache/
+__pycache__/
 .dockerhub-token
 .jenkins-token
-
+*.log

@@ -1,10 +1,9 @@
-import os, sys
+import os
 import math
 import unittest
 from unittest.mock import patch, MagicMock
 
-sys.path.append('..')
-import client.client as unit
+import src.client.client as unit
 
 
 # self.assertEqual(a, b)

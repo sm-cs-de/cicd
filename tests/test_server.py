@@ -1,10 +1,9 @@
-import os, sys
+import os
 import time
 import unittest
 from unittest.mock import patch, MagicMock
 
-sys.path.append('..')
-import server.server as unit
+import src.server.server as unit
 
 
 class TestServer(unittest.TestCase):

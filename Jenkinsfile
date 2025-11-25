@@ -49,15 +49,6 @@ pipeline {
 	        }
 	    }
 
-	    stage('Run Unit Tests 1') {
-	        steps {
-		        sh '''
-		        . venv/bin/activate
-		        python -m unittest discover -v tests
-		        '''
-	        }
-	    }
-
 	    stage('Build Docker Images') {
 		    steps {
 		        sh '''
@@ -67,7 +58,7 @@ pipeline {
 		    }
 	    }
 
-	    stage('Run Unit Tests 2') {
+	    stage('Run Unit Tests') {
 	        steps {
 	            sh '''
 	            SERVICES=$(docker compose config --services)

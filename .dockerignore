@@ -1,9 +1,11 @@
-.git
+.git/
 .gitignore
-.access-token
-*.log
+.idea/
+.run/
+.venv/
+.pytest_cache/
 __pycache__/
-node_modules/
 .env
-.idea
-.venv
+.dockerhub-token
+.jenkins-token
+*.log
