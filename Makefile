@@ -30,7 +30,7 @@ jenkins:
 	# run jenkins
 	@echo "Getting jenkings ready..."
 	cd ~/Zeugs/Tools/Build/Jenkins && docker-compose up -d
-	@sleep 5
+	@sleep 10
 	@echo "Starting build..."
 	@if [ -f $(JENKINS_TOKEN) ]; then \
 		TOKEN=$$(cat $(JENKINS_TOKEN)); \

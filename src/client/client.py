@@ -1,6 +1,7 @@
 import socket
 import time
 import math
+import random
 
 
 def client_connect():
@@ -33,7 +34,7 @@ def client_disconnect(client):
 
 
 def generate_point(i):
-    return 0.1 * i
+    return random.randrange(*XRange)
 
 
 if __name__ == "__main__":
