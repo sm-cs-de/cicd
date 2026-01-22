@@ -1,32 +1,28 @@
+from . import *
 import socket
 import time
-import math
 import random
 
 
 def client_connect():
-    SOCKET_PATH = "/sockets/cicd.sock"
-
-    time.sleep(1)
     client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     client.connect(SOCKET_PATH)
 
     return client
 
 
-def client_send(client, value):
-    msg = str(value)
+def client_send(client, task, value):
+    msg = task + " " + str(value)
+    print("Send: ", msg)
+
     client.sendall(msg.encode())
 
 
-def client_recv(client):
+def client_recv(client, task):
     msg = client.recv(1024).decode()
-    try:
-        value = float(msg)
-    except ValueError:
-        value = math.nan
+    print("Received: ", msg)
 
-    return value
+    return msg
 
 
 def client_disconnect(client):
@@ -34,21 +30,30 @@ def client_disconnect(client):
 
 
 def generate_point(i):
-    return random.randrange(*XRange)
+    return (XRange[1]-XRange[0])*random.random() + XRange[0]
 
 
 if __name__ == "__main__":
+    time.sleep(1)
+
     client = client_connect()
+    time.sleep(0.5)
 
-    point = generate_point(0)
-    for i in range(10):
-        client_send(client, point)
+    try:
+        client_send(client, "c", "64")
+        # client_send(client, "l", "test.save")
+        # time.sleep(0.5)
+        #
+        # for i in range(5):
+        #     point = generate_point(i)
+        #
+        #     client_send(client, "i", point)
+        #     time.sleep(0.1)
+        #
+        #     value = client_recv(client, "i")
+        #     time.sleep(0.1)
 
-        value = client_recv(client)
-        print(value)
-
-        i += 1
-        point = generate_point(i)
-        time.sleep(0.25)
+    except BrokenPipeError:
+        print("Connection was closed")
 
     client_disconnect(client)

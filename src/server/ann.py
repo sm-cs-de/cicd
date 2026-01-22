@@ -1,3 +1,4 @@
+from . import *
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -8,7 +9,7 @@ from scipy.interpolate import interp1d, CubicSpline, PchipInterpolator
 
 
 class Interpolator(nn.Module):
-    def __init__(self, input_dim: int, hidden_layers: List[int] activation: Callable = nn.ReLU):
+    def __init__(self, input_dim: int, hidden_layers: List[int], activation: Callable = nn.ReLU):
         super().__init__()
 
         layers = []
@@ -54,7 +55,7 @@ class Interpolator(nn.Module):
 
 
     @staticmethod
-    def load(path: str, input_dim: int, hidden_layers=[64, 64], activation=nn.ReLU):
+    def load(path: str, input_dim: int, hidden_layers: List[int], activation: Callable = nn.ReLU):
         model = Interpolator(input_dim, hidden_layers, activation)
         state = torch.load(path, map_location=torch.device("cpu"))
         model.load_state_dict(state)
