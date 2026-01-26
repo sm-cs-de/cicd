@@ -1,10 +1,13 @@
+import torch
+
 from . import *
+from . import ann
 import socket
 import os
 import time
 import re
-import ann
 import torch.nn as nn
+import numpy as np
 
 
 def server_start():
@@ -25,11 +28,13 @@ def server_start():
 def server_recv(conn):
     data_ = conn.recv(1024)
     if not data_:
-        return "quit", "Client disconnect"
+        return "quit", "IO error"
 
     msg = data_.decode()
+    if msg == "quit":
+        return "quit", "Client disconnect"
 
-    rgx = "([i,l,s]+)\\s+(.+)"
+    rgx = "([c,i,l,s]+)\\s+(.+)"
     match = re.findall(rgx, msg)
     if not match:
         return "quit", "Invalid message"
@@ -53,7 +58,7 @@ def server_close(server, conn):
 
 if __name__ == "__main__":
     server, conn = server_start()
-    interpolator = None
+    inter = None
 
     while True:
         task, data = server_recv(conn)
@@ -61,37 +66,48 @@ if __name__ == "__main__":
         msg = ""
         quit = False
         if task == "quit":
-            msg = task + data
+            msg = data
             quit = True
         elif task == "l":
             msg = "loading.." # https://apxml.com/courses/getting-started-with-pytorch/chapter-6-implementing-training-loop/saving-loading-model-checkpoints
             ###
         elif task == "s":
-            if not interpolator:
+            if not inter:
                 msg = "no model"
                 quit = True
             else:
                 msg = "saving.."
                 ###
         elif task == "c":
-            msg = "creating.."
-            interpolator = ann.Interpolator(1, [64,64], nn.ReLU)
-                ###
+            dim = int(data)
+            msg = "creating ANN with " + str(2*dim+1) + " inputs for " + str(dim) + " points and the x-position"
+
+            inter = ann.Interpolator(2*dim+1, [64, 64], nn.ReLU)
+            train = ann.TrainingData("linear")
+            train_data_x, train_data_y = train.generate_dataset(500, dim)
+            inter.train_full(train_data_x, train_data_y)
+
+            x_sample = np.sort(np.random.uniform(*XRange, size=dim))
+            y_sample = np.sin(x_sample)
+            x_inter = 0.0
+            ann_input = torch.tensor(np.concatenate([x_sample, y_sample, [x_inter]]),dtype=torch.float32)
+            print(inter(ann_input))
+
         elif task == "t":
-            if not interpolator:
+            if not inter:
                 msg = "no model"
                 quit = True
             else:
                 msg = "training.."
                 ###
         elif task == "i":
-            if not interpolator:
+            if not inter:
                 msg = "no model"
                 quit = True
             else:
-                msg = interpolator.forward(float(data))
+                msg = inter.forward(float(data))
 
-        print({time.time()}, msg)
+        print({time.time()}, "quit: "+msg if quit else msg)
         if quit:
             break
         else:

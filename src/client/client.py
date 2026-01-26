@@ -34,13 +34,14 @@ def generate_point(i):
 
 
 if __name__ == "__main__":
-    time.sleep(1)
+    time.sleep(3)
 
     client = client_connect()
     time.sleep(0.5)
 
     try:
-        client_send(client, "c", "64")
+        client_send(client, "c", "10")
+        client_recv(client, "c")
         # client_send(client, "l", "test.save")
         # time.sleep(0.5)
         #
@@ -51,7 +52,9 @@ if __name__ == "__main__":
         #     time.sleep(0.1)
         #
         #     value = client_recv(client, "i")
-        #     time.sleep(0.1)
+
+        client_send(client, "quit", "")
+        client_recv(client, "")
 
     except BrokenPipeError:
         print("Connection was closed")

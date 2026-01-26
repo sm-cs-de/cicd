@@ -86,18 +86,18 @@ class TrainingData:
         return xs, ys, f
 
 
-    def generate_dataset(self, count: int, n_points: int) -> Tuple[np.ndarray, np.ndarray]:
+    def generate_dataset(self, count: int, n_points: int) -> Tuple[torch.tensor, torch.tensor]:
         X = []
         Y = []
 
         for _ in range(count):
             xs, ys, f = self.generate_function(n_points)
 
-            query_x = np.random.uniform(xs.min(), xs.max())
-            query_y = float(f(query_x))
+            inter_x = np.random.uniform(xs.min(), xs.max())
+            inter_y = float(f(inter_x))
 
-            input_vec = np.concatenate([xs, ys, [query_x]])
-            X.append(input_vec)
-            Y.append(query_y)
+            ann_input = np.concatenate([xs, ys, [inter_x]])
+            X.append(ann_input)
+            Y.append(inter_y)
 
-        return np.array(X, dtype=np.float32), np.array(Y, dtype=np.float32)
+        return torch.tensor(np.array(X,dtype=np.float32)), torch.tensor(np.array(Y,dtype=np.float32))
