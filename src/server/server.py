@@ -34,7 +34,7 @@ def server_recv(conn):
     if msg == "quit":
         return "quit", "Client disconnect"
 
-    rgx = "([c,i,l,s]+)\\s+(.+)"
+    rgx = "([c,i,l,s,t]+)\\s+(.+)"
     match = re.findall(rgx, msg)
     if not match:
         return "quit", "Invalid message"
@@ -68,47 +68,55 @@ if __name__ == "__main__":
         if task == "quit":
             msg = data
             quit = True
+
         elif task == "l":
-            msg = "loading.." # https://apxml.com/courses/getting-started-with-pytorch/chapter-6-implementing-training-loop/saving-loading-model-checkpoints
-            ###
+            if not inter:
+                msg = "no model"
+                quit = True
+            else:
+                msg = "loading from " + data # https://apxml.com/courses/getting-started-with-pytorch/chapter-6-implementing-training-loop/saving-loading-model-checkpoints
+                inter.load(data)
+
         elif task == "s":
             if not inter:
                 msg = "no model"
                 quit = True
             else:
-                msg = "saving.."
-                ###
+                msg = "saving to " + data
+                inter.save(data)
+
         elif task == "c":
             dim = int(data)
             msg = "creating ANN with " + str(2*dim+1) + " inputs for " + str(dim) + " points and the x-position"
-
             inter = ann.Interpolator(2*dim+1, [64, 64], nn.ReLU)
-            train = ann.TrainingData("linear")
-            train_data_x, train_data_y = train.generate_dataset(500, dim)
-            inter.train_full(train_data_x, train_data_y)
-
-            x_sample = np.sort(np.random.uniform(*XRange, size=dim))
-            y_sample = np.sin(x_sample)
-            x_inter = 0.0
-            ann_input = torch.tensor(np.concatenate([x_sample, y_sample, [x_inter]]),dtype=torch.float32)
-            print(inter(ann_input))
 
         elif task == "t":
             if not inter:
                 msg = "no model"
                 quit = True
             else:
-                msg = "training.."
-                ###
+                num = int(data)
+                msg = "training with " + str(num) + " samples"
+                train = ann.TrainingData("cubic")
+                train_data_x, train_data_y = train.generate_dataset(num, inter.dim)
+                inter.train_full(train_data_x, train_data_y)
+
         elif task == "i":
             if not inter:
                 msg = "no model"
                 quit = True
             else:
-                msg = inter.forward(float(data))
+                x_sample = np.sort(np.random.uniform(*XRange, size=inter.dim))
+                y_sample = np.sin(x_sample)
+                x_inter = float(data)
+                ann_input = torch.tensor(np.concatenate([x_sample, y_sample, [x_inter]]),dtype=torch.float32)
+                msg = str(inter(ann_input))
 
-        print({time.time()}, "quit: "+msg if quit else msg)
+        if len(msg) != 0:
+            print({time.time()}, "quit: "+msg if quit else msg)
         if quit:
+            server_send(conn, "quitting..")
+            time.sleep(0.5)
             break
         else:
             server_send(conn, msg)

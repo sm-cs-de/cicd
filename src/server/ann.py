@@ -21,6 +21,8 @@ class Interpolator(nn.Module):
         layers.append(nn.Linear(last_dim, 1))
 
         self.model = nn.Sequential(*layers)
+        self.input_dim = input_dim
+        self.dim = int(input_dim-1)//2
 
 
     def forward(self, x):
@@ -54,14 +56,9 @@ class Interpolator(nn.Module):
         torch.save(self.state_dict(), path)
 
 
-    @staticmethod
-    def load(path: str, input_dim: int, hidden_layers: List[int], activation: Callable = nn.ReLU):
-        model = Interpolator(input_dim, hidden_layers, activation)
+    def load(self, path: str):
         state = torch.load(path, map_location=torch.device("cpu"))
-        model.load_state_dict(state)
-
-        return model
-
+        self.load_state_dict(state)
 
 
 class TrainingData:

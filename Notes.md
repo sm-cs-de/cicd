@@ -5,9 +5,11 @@
 
 # Use:
 - Client message send format: `<task> [<value>]` with
+  - `c <dim>`: Create ANN to interpolate `dim` using (x,y)-points
+  - `i <point>`: Interpolate at `point`
   - `l <file>`: Load ANN data from `file`
   - `s <file>`: Save ANN data to `file`
-  - `i <point>`: Interpolate at `point`
+  - `t <num>`: Train ANN using `num` samples
   
 # TODO:
-- fix import error for `ann` in server
+- add permanent ann data (`models` directory) to be loaded

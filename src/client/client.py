@@ -12,7 +12,10 @@ def client_connect():
 
 
 def client_send(client, task, value):
-    msg = task + " " + str(value)
+    if len(str(value)) > 0:
+        msg = task + " " + str(value)
+    else:
+        msg = task
     print("Send: ", msg)
 
     client.sendall(msg.encode())
@@ -40,18 +43,23 @@ if __name__ == "__main__":
     time.sleep(0.5)
 
     try:
-        client_send(client, "c", "10")
+        client_send(client, "c", "20")
         client_recv(client, "c")
-        # client_send(client, "l", "test.save")
-        # time.sleep(0.5)
-        #
-        # for i in range(5):
-        #     point = generate_point(i)
-        #
-        #     client_send(client, "i", point)
-        #     time.sleep(0.1)
-        #
-        #     value = client_recv(client, "i")
+
+        client_send(client, "t", "1000")
+        client_recv(client, "t")
+        time.sleep(0.5)
+
+        client_send(client, "s", "./test.sav")
+        time.sleep(0.5)
+
+        client_send(client, "l", "./test.sav")
+        time.sleep(0.5)
+
+        for i in range(5):
+            point = generate_point(i)
+            client_send(client, "i", point)
+            value = client_recv(client, "i")
 
         client_send(client, "quit", "")
         client_recv(client, "")
