@@ -1,21 +1,42 @@
 services:
+  init-sockets:
+    image: busybox
+    user: root
+    volumes:
+      - sockdata:/app/sockets
+    command: chown -R ${UID}:${GID} /app/sockets
+
   server:
     build: 
       context: .
+      args:
+        UID: ${UID}
+        GID: ${GID}
       dockerfile: build/Dockerfile.server
     image: smcsde/cicd:server_${VERSION}
     container_name: cicd_server_${VERSION}
+    user: "${UID}:${GID}"
+    depends_on:
+      - init-sockets
     volumes:
-      - sockdata:/sockets
+      - sockdata:/app/sockets
+      - ./models:/app/models:rw
 
   client:
     build: 
       context: .
+      args:
+        UID: ${UID}
+        GID: ${GID}
       dockerfile: build/Dockerfile.client
     image: smcsde/cicd:client_${VERSION}
     container_name: cicd_client_${VERSION}
+    user: "${UID}:${GID}"
+    depends_on:
+      - init-sockets
     volumes:
-      - sockdata:/sockets
+      - sockdata:/app/sockets
+      - ./models:/app/models:ro
 
 volumes:
   sockdata:

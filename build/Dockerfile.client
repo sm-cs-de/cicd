@@ -1,13 +1,18 @@
 FROM python:3.13.7-slim
 WORKDIR /app
-ENV PYTHONPATH=/app
 
 COPY build/requirements.txt.client requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+ARG UID
+ARG GID
+RUN groupadd -g $GID appuser && useradd -m -u $UID -g $GID appuser
+USER $UID:$GID
+
 COPY pytest.ini .
 COPY src/*.py src/
 COPY src/client/ src/client/
+COPY models/ models/
 COPY tests/test_client.py tests/
 
 CMD ["python", "-m", "src.client.client"]

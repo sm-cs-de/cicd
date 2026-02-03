@@ -1,7 +1,7 @@
 import torch
 
 from . import *
-from . import ann
+from . import ann, MODEL_PATH
 import socket
 import os
 import time
@@ -74,16 +74,16 @@ if __name__ == "__main__":
                 msg = "no model"
                 quit = True
             else:
-                msg = "loading from " + data # https://apxml.com/courses/getting-started-with-pytorch/chapter-6-implementing-training-loop/saving-loading-model-checkpoints
-                inter.load(data)
+                msg = "loading from " + MODEL_PATH + data # https://apxml.com/courses/getting-started-with-pytorch/chapter-6-implementing-training-loop/saving-loading-model-checkpoints
+                inter.load(MODEL_PATH + data)
 
         elif task == "s":
             if not inter:
                 msg = "no model"
                 quit = True
             else:
-                msg = "saving to " + data
-                inter.save(data)
+                msg = "saving to " + MODEL_PATH + data
+                inter.save(MODEL_PATH + data)
 
         elif task == "c":
             dim = int(data)

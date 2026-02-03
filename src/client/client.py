@@ -50,10 +50,10 @@ if __name__ == "__main__":
         client_recv(client, "t")
         time.sleep(0.5)
 
-        client_send(client, "s", "./test.sav")
+        client_send(client, "s", "test.sav")
         time.sleep(0.5)
 
-        client_send(client, "l", "./test.sav")
+        client_send(client, "l", "test.sav")
         time.sleep(0.5)
 
         for i in range(5):
