@@ -1,7 +1,7 @@
 from . import *
 import socket
 import time
-import random
+import numpy as np
 
 
 def client_connect():
@@ -32,8 +32,8 @@ def client_disconnect(client):
     client.close()
 
 
-def generate_point(i):
-    return (XRange[1]-XRange[0])*random.random() + XRange[0]
+def generate_point(rnd, i):
+    return (XRange[1]-XRange[0])*rnd.random() + XRange[0]
 
 
 if __name__ == "__main__":
@@ -46,7 +46,7 @@ if __name__ == "__main__":
         client_send(client, "c", "20")
         client_recv(client, "c")
 
-        client_send(client, "t", "1000")
+        client_send(client, "t", "10000")
         client_recv(client, "t")
         time.sleep(0.5)
 
@@ -56,10 +56,12 @@ if __name__ == "__main__":
         client_send(client, "l", "test.sav")
         time.sleep(0.5)
 
+        rnd = np.random.default_rng()
         for i in range(5):
-            point = generate_point(i)
+            point = generate_point(rnd, i)
             client_send(client, "i", point)
             value = client_recv(client, "i")
+            time.sleep(0.1)
 
         client_send(client, "quit", "")
         client_recv(client, "")

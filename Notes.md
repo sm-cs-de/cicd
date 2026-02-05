@@ -10,6 +10,7 @@
   - `l <file>`: Load ANN data from `file`
   - `s <file>`: Save ANN data to `file`
   - `t <num>`: Train ANN using `num` samples
-  
+
 # TODO:
-- add permanent ann data (`models` directory) to be loaded
+  - data normalization
+  - improve interpolation training

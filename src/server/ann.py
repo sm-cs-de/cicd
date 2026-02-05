@@ -1,8 +1,8 @@
 from . import *
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import os
 import numpy as np
 from typing import List, Callable, Tuple
 from scipy.interpolate import interp1d, CubicSpline, PchipInterpolator
@@ -25,14 +25,24 @@ class Interpolator(nn.Module):
         self.dim = int(input_dim-1)//2
 
 
+    def scale(self, data, range):
+        return (data - range[0]) / (range[1] - range[0])
+
+
+    def unscale(self, data, range):
+        return data * (range[1] - range[0]) + range[0]
+
+
     def forward(self, x):
-        return self.model(x).squeeze(-1)
+        ret = self.model(self.scale(x, XRange)).squeeze(-1)
+
+        return self.unscale(ret, YRange)
 
 
     def train_batch(self, x, y, optimizer, loss_fn):
         optimizer.zero_grad()
         pred = self.forward(x)
-        loss = loss_fn(pred, y)
+        loss = loss_fn(self.scale(pred, YRange), self.scale(y, YRange))
         loss.backward()
         optimizer.step()
 
@@ -73,28 +83,29 @@ class TrainingData:
         if mode not in self.MODES:
             raise ValueError(f"Unknown interpolation mode '{mode}'")
         self.mode = mode
+        self.rnd = np.random.default_rng()
 
 
     def generate_function(self, n_points: int):
-        xs = np.sort(np.random.uniform(*XRange, size=n_points))
-        ys = np.sin(xs) + np.random.normal(0, RndScale, size=n_points)
+        xs = np.sort(self.rnd.uniform(*XRange, size=n_points))
+        ys = np.sin(xs) + self.rnd.normal(0, RndScale, size=n_points)
         f = self.MODES[self.mode](xs, ys)
 
         return xs, ys, f
 
 
     def generate_dataset(self, count: int, n_points: int) -> Tuple[torch.tensor, torch.tensor]:
-        X = []
-        Y = []
+        x = []
+        y = []
 
         for _ in range(count):
             xs, ys, f = self.generate_function(n_points)
 
-            inter_x = np.random.uniform(xs.min(), xs.max())
+            inter_x = self.rnd.uniform(xs.min(), xs.max())
             inter_y = float(f(inter_x))
 
             ann_input = np.concatenate([xs, ys, [inter_x]])
-            X.append(ann_input)
-            Y.append(inter_y)
+            x.append(ann_input)
+            y.append(inter_y)
 
-        return torch.tensor(np.array(X,dtype=np.float32)), torch.tensor(np.array(Y,dtype=np.float32))
+        return torch.tensor(np.array(x,dtype=np.float32)), torch.tensor(np.array(y,dtype=np.float32))

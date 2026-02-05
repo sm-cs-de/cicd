@@ -1,11 +1,10 @@
-import torch
-
 from . import *
-from . import ann, MODEL_PATH
+from . import ann
 import socket
 import os
 import time
 import re
+import torch
 import torch.nn as nn
 import numpy as np
 
@@ -59,6 +58,7 @@ def server_close(server, conn):
 if __name__ == "__main__":
     server, conn = server_start()
     inter = None
+    rnd = np.random.default_rng()
 
     while True:
         task, data = server_recv(conn)
@@ -106,11 +106,12 @@ if __name__ == "__main__":
                 msg = "no model"
                 quit = True
             else:
-                x_sample = np.sort(np.random.uniform(*XRange, size=inter.dim))
-                y_sample = np.sin(x_sample)
+                fct = np.sin
+                x_sample = np.sort(rnd.uniform(*XRange, size=inter.dim))
+                y_sample = fct(x_sample)
                 x_inter = float(data)
                 ann_input = torch.tensor(np.concatenate([x_sample, y_sample, [x_inter]]),dtype=torch.float32)
-                msg = str(inter(ann_input))
+                msg = str(inter(ann_input)) + " (" + str(fct(x_inter)) + ")"
 
         if len(msg) != 0:
             print({time.time()}, "quit: "+msg if quit else msg)
