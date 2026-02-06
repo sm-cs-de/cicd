@@ -97,7 +97,7 @@ if __name__ == "__main__":
             else:
                 num = int(data)
                 msg = "training with " + str(num) + " samples"
-                train = ann.TrainingData("cubic")
+                train = ann.TrainingData("linear")
                 train_data_x, train_data_y = train.generate_dataset(num, inter.dim)
                 inter.train_full(train_data_x, train_data_y)
 
@@ -106,12 +106,13 @@ if __name__ == "__main__":
                 msg = "no model"
                 quit = True
             else:
-                fct = np.sin
+                fct = lambda x: x / XRange[1]
                 x_sample = np.sort(rnd.uniform(*XRange, size=inter.dim))
                 y_sample = fct(x_sample)
                 x_inter = float(data)
                 ann_input = torch.tensor(np.concatenate([x_sample, y_sample, [x_inter]]),dtype=torch.float32)
-                msg = str(inter(ann_input)) + " (" + str(fct(x_inter)) + ")"
+                ann_output = inter(ann_input).item()
+                msg = str(ann_output) + " (" + str(fct(x_inter)) + "," + str(fct(x_inter)-ann_output) + "," + str(np.round(100*fct(x_inter)/ann_output-100,3)) + ")"
 
         if len(msg) != 0:
             print({time.time()}, "quit: "+msg if quit else msg)

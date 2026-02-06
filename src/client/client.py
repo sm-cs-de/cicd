@@ -46,7 +46,7 @@ if __name__ == "__main__":
         client_send(client, "c", "20")
         client_recv(client, "c")
 
-        client_send(client, "t", "10000")
+        client_send(client, "t", "1000")
         client_recv(client, "t")
         time.sleep(0.5)
 

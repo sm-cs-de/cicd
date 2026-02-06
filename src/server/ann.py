@@ -87,8 +87,9 @@ class TrainingData:
 
 
     def generate_function(self, n_points: int):
+        fct = lambda x: x / XRange[1]
         xs = np.sort(self.rnd.uniform(*XRange, size=n_points))
-        ys = np.sin(xs) + self.rnd.normal(0, RndScale, size=n_points)
+        ys = fct(xs) + self.rnd.normal(0, RndScale, size=n_points)
         f = self.MODES[self.mode](xs, ys)
 
         return xs, ys, f
